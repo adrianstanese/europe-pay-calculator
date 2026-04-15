@@ -101,31 +101,31 @@ const COUNTRIES = [
 // All amounts in EUR (annual). Currencies converted at input.
 
 const TAX_DATA = {
-  // ═══ GERMANY ═══
+  // ═══ GERMANY ═══ (2025/2026)
   DE: {
     name: "Germany",
     brackets: [
-      { up: 11784, rate: 0 },
-      { up: 17005, rate: 0.14 },  // progressive zone 1 (avg ~14%)
-      { up: 66760, rate: 0.2397 }, // progressive zone 2 (avg ~24%)
-      { up: 277825, rate: 0.42 },
+      { up: 12096, rate: 0 },       // Grundfreibetrag 2025
+      { up: 17443, rate: 0.14 },    // progressive zone 1
+      { up: 68480, rate: 0.2397 },  // progressive zone 2
+      { up: 277826, rate: 0.42 },
       { up: Infinity, rate: 0.45 },
     ],
-    deduction: 0, // Built into 0% bracket
+    deduction: 0,
     empSocial: {
-      pension: { rate: 0.093, cap: 96600 },
-      health: { rate: 0.0875, cap: 66150 },  // 14.6%+2.9% avg / 2
-      nursing: { rate: 0.0235, cap: 66150 },  // childless rate
-      unemployment: { rate: 0.013, cap: 96600 },
+      pension: { rate: 0.093, cap: 101400 },    // 2025/26 cap
+      health: { rate: 0.0875, cap: 69750 },     // 14.6%+2.9% avg / 2; cap 2025/26
+      nursing: { rate: 0.0235, cap: 69750 },    // childless rate
+      unemployment: { rate: 0.013, cap: 101400 },
     },
     employerSocial: {
-      pension: { rate: 0.093, cap: 96600 },
-      health: { rate: 0.0875, cap: 66150 },
-      nursing: { rate: 0.018, cap: 66150 },
-      unemployment: { rate: 0.013, cap: 96600 },
+      pension: { rate: 0.093, cap: 101400 },
+      health: { rate: 0.0875, cap: 69750 },
+      nursing: { rate: 0.018, cap: 69750 },
+      unemployment: { rate: 0.013, cap: 101400 },
       accident: { rate: 0.0012, cap: Infinity },
     },
-    solidarity: { rate: 0.055, threshold: 19450 }, // 5.5% on tax above threshold
+    solidarity: { rate: 0.055, threshold: 20350 },
   },
 
   // ═══ FRANCE ═══
@@ -162,9 +162,10 @@ const TAX_DATA = {
     },
   },
 
-  // ═══ UNITED KINGDOM ═══
+  // ═══ UNITED KINGDOM ═══ (2025/26)
   GB: {
     name: "United Kingdom",
+    taxOnGross: true,  // UK taxes gross income, not gross minus NI
     brackets: [
       { up: 12570, rate: 0 },     // Personal Allowance
       { up: 50270, rate: 0.20 },   // Basic rate
@@ -172,52 +173,52 @@ const TAX_DATA = {
       { up: Infinity, rate: 0.45 }, // Additional rate
     ],
     deduction: 0,
-    personalAllowanceTaper: { threshold: 100000, rate: 0.5 }, // PA reduces by £1 per £2 over 100k
+    personalAllowanceTaper: { threshold: 100000, rate: 0.5 },
     empSocial: {
-      ni: { rate: 0.08, floor: 12570, cap: 50270 },  // 8% on earnings 12,570-50,270
-      niUpper: { rate: 0.02, capMin: 50270, cap: Infinity }, // 2% above UEL
+      ni: { rate: 0.08, floor: 12570, cap: 50270 },
+      niUpper: { rate: 0.02, capMin: 50270, cap: Infinity },
     },
     employerSocial: {
-      ni: { rate: 0.15, floor: 5000, cap: Infinity },  // 15% above £5,000 (Apr 2025)
+      ni: { rate: 0.15, floor: 5000, cap: Infinity },  // 15% from Apr 2025
     },
   },
 
-  // ═══ NETHERLANDS ═══
+  // ═══ NETHERLANDS ═══ (2025/26)
   NL: {
     name: "Netherlands",
+    taxOnGross: true, // NL box 1 combined rate applies to gross
     brackets: [
-      { up: 38441, rate: 0.3593 },  // Combined rate (income tax + social premiums)
-      { up: 75518, rate: 0.3593 },
+      { up: 38883, rate: 0.3575 },   // 2026 combined rate
+      { up: 78426, rate: 0.3756 },
       { up: Infinity, rate: 0.495 },
     ],
-    deduction: 3362,  // General tax credit (arbeidskorting) - simplified
+    deduction: 3362,  // General tax credit (heffingskorting) - simplified
     empSocial: {
-      pension: { rate: 0.0, cap: 0 },  // Included in box 1 combined rate
-      health: { rate: 0.0549, cap: 75518 }, // Nominal ZVW contribution
+      health: { rate: 0.0549, cap: 78426 }, // Nominal ZVW
     },
     employerSocial: {
-      health: { rate: 0.065, cap: 75518 },
-      unemployment: { rate: 0.0274, cap: 75518 },  // Low rate
-      disability: { rate: 0.068, cap: 75518 },
-      childcare: { rate: 0.005, cap: 75518 },
+      health: { rate: 0.0651, cap: 78426 },
+      unemployment: { rate: 0.0274, cap: 78426 },
+      disability: { rate: 0.068, cap: 78426 },
+      childcare: { rate: 0.005, cap: 78426 },
     },
   },
 
-  // ═══ BELGIUM ═══
+  // ═══ BELGIUM ═══ (2025/26)
   BE: {
     name: "Belgium",
     brackets: [
-      { up: 15820, rate: 0.25 },
-      { up: 27920, rate: 0.40 },
-      { up: 48320, rate: 0.45 },
+      { up: 15200, rate: 0.25 },
+      { up: 26830, rate: 0.40 },
+      { up: 46440, rate: 0.45 },
       { up: Infinity, rate: 0.50 },
     ],
-    deduction: 10570,  // Tax-free sum
+    deduction: 10910,  // Tax-free sum 2025
     empSocial: {
       social: { rate: 0.1307, cap: Infinity },
     },
     employerSocial: {
-      social: { rate: 0.2500, cap: Infinity },  // ~25% standard
+      social: { rate: 0.2500, cap: Infinity },
     },
   },
 
@@ -319,23 +320,23 @@ const TAX_DATA = {
     },
   },
 
-  // ═══ POLAND ═══
+  // ═══ POLAND ═══ (2025/26)
   PL: {
     name: "Poland",
     brackets: [
       { up: 120000, rate: 0.12 },
       { up: Infinity, rate: 0.32 },
     ],
-    deduction: 30000,  // Tax-free amount
+    deduction: 30000,  // Tax-free amount (PIT-0)
     empSocial: {
-      pension: { rate: 0.0976, cap: 267400 },
-      disability: { rate: 0.015, cap: 267400 },
+      pension: { rate: 0.0976, cap: 282600 },   // 2026 cap
+      disability: { rate: 0.015, cap: 282600 },
       sickness: { rate: 0.0245, cap: Infinity },
-      health: { rate: 0.09, cap: Infinity },  // 9% not deductible from tax fully
+      health: { rate: 0.09, cap: Infinity },
     },
     employerSocial: {
-      pension: { rate: 0.0976, cap: 267400 },
-      disability: { rate: 0.065, cap: 267400 },
+      pension: { rate: 0.0976, cap: 282600 },
+      disability: { rate: 0.065, cap: 282600 },
       accident: { rate: 0.0167, cap: Infinity },
       labor: { rate: 0.0245, cap: Infinity },
       fgsp: { rate: 0.001, cap: Infinity },
@@ -470,25 +471,26 @@ const TAX_DATA = {
     },
   },
 
-  // ═══ IRELAND ═══
+  // ═══ IRELAND ═══ (2025/26)
   IE: {
     name: "Ireland",
+    taxOnGross: true,  // IE taxes gross income, PRSI is separate
     brackets: [
       { up: 44000, rate: 0.20 },
       { up: Infinity, rate: 0.40 },
     ],
-    deduction: 1875,  // Personal tax credit
-    usc: [  // Universal Social Charge
+    deduction: 3750,  // Personal credit €1,875 + PAYE credit €1,875
+    usc: [
       { up: 12012, rate: 0.005 },
       { up: 25760, rate: 0.02 },
       { up: 70044, rate: 0.04 },
       { up: Infinity, rate: 0.08 },
     ],
     empSocial: {
-      prsi: { rate: 0.04, cap: Infinity },  // Class A employee PRSI
+      prsi: { rate: 0.042, cap: Infinity },  // 4.2% from Oct 2025
     },
     employerSocial: {
-      prsi: { rate: 0.1125, cap: Infinity }, // 11.25% employer PRSI
+      prsi: { rate: 0.1125, cap: Infinity },
     },
   },
 
@@ -555,6 +557,7 @@ const TAX_DATA = {
   // ═══ HUNGARY ═══
   HU: {
     name: "Hungary",
+    taxOnGross: true,  // PIT on gross, social is separate
     brackets: [
       { up: Infinity, rate: 0.15 },  // Flat 15%
     ],
@@ -812,13 +815,14 @@ const TAX_DATA = {
   // ═══ UKRAINE ═══
   UA: {
     name: "Ukraine",
+    taxOnGross: true,  // PIT on gross
     brackets: [
       { up: Infinity, rate: 0.18 },  // Flat 18% PIT
     ],
     militarySurcharge: 0.015,  // 1.5% military levy
     deduction: 0,
     empSocial: {
-      social: { rate: 0.0, cap: 0 },  // No employee social contributions
+      social: { rate: 0.0, cap: 0 },
     },
     employerSocial: {
       usc: { rate: 0.22, cap: Infinity },  // Unified social contribution
@@ -1096,51 +1100,63 @@ function calculateCountry(countryCode, inputAmount, direction = "grossToNet") {
   const co = COUNTRIES.find(c => c.c === countryCode);
   if (!co) return null;
 
-  // Convert to local currency for calculation if needed
-  const fx = co.fx || 1;
-  let gross;
+  const fx = co.fx || 1; // EUR to local currency rate
+  let grossEUR; // Input/output always in EUR
 
   if (direction === "grossToNet") {
-    gross = inputAmount;
+    grossEUR = inputAmount;
   } else if (direction === "netToGross") {
-    // Iterative solver: find gross that yields this net
-    gross = solveForGross(countryCode, inputAmount, "net");
+    grossEUR = solveForGross(countryCode, inputAmount, "net");
   } else if (direction === "totalToNet") {
-    // Find gross from total company cost, then compute net
-    gross = solveForGross(countryCode, inputAmount, "total");
+    grossEUR = solveForGross(countryCode, inputAmount, "total");
   }
 
-  // Employee social contributions
-  const empSoc = calcSocialContrib(gross, td.empSocial || {});
+  // Convert to local currency for all bracket/cap calculations
+  const gross = grossEUR * fx;
 
-  // Taxable income
-  let taxableIncome = gross - empSoc.total;
+  // Employee social contributions (calculated in local currency)
+  let empSocialDef = td.empSocial || {};
+  if (countryCode === "FR") {
+    empSocialDef = { ...td.empSocial };
+    if (empSocialDef.csg) empSocialDef.csg = { ...empSocialDef.csg, rate: 0.092 * 0.9825 };
+    if (empSocialDef.crds) empSocialDef.crds = { ...empSocialDef.crds, rate: 0.005 * 0.9825 };
+  }
+  const empSoc = calcSocialContrib(gross, empSocialDef);
 
-  // Apply deduction
-  if (td.deduction) taxableIncome = Math.max(0, taxableIncome - td.deduction);
+  // Taxable income (in local currency)
+  let taxableIncome;
+  if (td.taxOnGross) {
+    taxableIncome = gross;
+  } else {
+    taxableIncome = gross - empSoc.total;
+  }
 
-  // Special: Denmark labor market contribution
+  // Apply deduction / personal allowance (credits handled separately below)
+  if (td.deduction && countryCode !== "IE" && countryCode !== "IT" && countryCode !== "NL") {
+    taxableIncome = Math.max(0, taxableIncome - td.deduction);
+  }
+
+  // Special: Denmark labor market contribution (AM-bidrag deducted before tax)
   if (td.laborMarketRate) {
     const amBidrag = gross * td.laborMarketRate;
     taxableIncome = gross - amBidrag;
     if (td.deduction) taxableIncome = Math.max(0, taxableIncome - td.deduction);
   }
 
-  // Income tax
+  // Income tax (in local currency)
   let incomeTax = calcProgressiveTax(taxableIncome, td.brackets);
 
-  // Special: Ireland USC
+  // Special: Ireland USC (on gross income)
   if (td.usc) {
-    const uscTax = calcProgressiveTax(gross, td.usc);
-    incomeTax += uscTax;
+    incomeTax += calcProgressiveTax(gross, td.usc);
   }
 
   // Special: Finland municipal tax
-  if (td.municipalRate) {
+  if (td.municipalRate && countryCode === "FI") {
     incomeTax += Math.max(0, taxableIncome) * td.municipalRate;
   }
 
-  // Special: Norway municipal tax
+  // Special: Norway — bracket tax + flat 22% on ordinary income
   if (countryCode === "NO") {
     incomeTax += Math.max(0, taxableIncome) * td.municipalRate;
   }
@@ -1150,18 +1166,17 @@ function calculateCountry(countryCode, inputAmount, direction = "grossToNet") {
     incomeTax += Math.max(0, taxableIncome) * td.cantonalRate;
   }
 
-  // Special: UK personal allowance taper
+  // Special: UK personal allowance taper (income > £100k)
   if (td.personalAllowanceTaper && gross > td.personalAllowanceTaper.threshold) {
     const excess = gross - td.personalAllowanceTaper.threshold;
     const paReduction = Math.min(12570, excess * td.personalAllowanceTaper.rate);
-    // Recalculate with reduced PA
     const adjustedBrackets = JSON.parse(JSON.stringify(td.brackets));
     adjustedBrackets[0].up = Math.max(0, 12570 - paReduction);
-    incomeTax = calcProgressiveTax(gross - empSoc.total, adjustedBrackets);
+    incomeTax = calcProgressiveTax(gross, adjustedBrackets);
   }
 
-  // Apply tax credit / deduction from tax
-  if (countryCode === "IE") incomeTax = Math.max(0, incomeTax - 1875); // Personal credit
+  // Apply tax credits (deducted from computed tax, not taxable income)
+  if (countryCode === "IE") incomeTax = Math.max(0, incomeTax - td.deduction);
   if (countryCode === "IT") incomeTax = Math.max(0, incomeTax - td.deduction);
   if (countryCode === "NL") incomeTax = Math.max(0, incomeTax - td.deduction);
 
@@ -1176,7 +1191,7 @@ function calculateCountry(countryCode, inputAmount, direction = "grossToNet") {
     solidarityTax = gross * td.militarySurcharge;
   }
 
-  // Total employee deductions
+  // Total employee deductions (in local currency)
   const totalEmployeeDeductions = empSoc.total + incomeTax + solidarityTax;
 
   // Special: Denmark AM-bidrag
@@ -1185,11 +1200,28 @@ function calculateCountry(countryCode, inputAmount, direction = "grossToNet") {
     laborMarketContrib = gross * td.laborMarketRate;
   }
 
-  const net = gross - totalEmployeeDeductions - laborMarketContrib;
+  const netLocal = gross - totalEmployeeDeductions - laborMarketContrib;
 
-  // Employer social contributions
+  // Employer social contributions (in local currency)
   const emplerSoc = calcSocialContrib(gross, td.employerSocial || {});
-  const totalCompanyCost = gross + emplerSoc.total;
+  const totalCompanyCostLocal = gross + emplerSoc.total;
+
+  // Convert all results back to EUR for display
+  const toEUR = (v) => v / fx;
+  const grossEUROut = toEUR(gross);
+  const netEUR = toEUR(Math.max(0, netLocal));
+  const incomeTaxEUR = toEUR(incomeTax);
+  const solidarityTaxEUR = toEUR(solidarityTax);
+  const laborContribEUR = toEUR(laborMarketContrib);
+  const empSocEUR = toEUR(empSoc.total);
+  const emplerSocEUR = toEUR(emplerSoc.total);
+  const totalCostEUR = toEUR(totalCompanyCostLocal);
+
+  // Convert breakdowns to EUR
+  const empBreakdownEUR = {};
+  for (const [k, v] of Object.entries(empSoc.breakdown)) empBreakdownEUR[k] = toEUR(v);
+  const emplerBreakdownEUR = {};
+  for (const [k, v] of Object.entries(emplerSoc.breakdown)) emplerBreakdownEUR[k] = toEUR(v);
 
   return {
     country: countryCode,
@@ -1197,19 +1229,20 @@ function calculateCountry(countryCode, inputAmount, direction = "grossToNet") {
     flag: co.f,
     currency: co.cur,
     fx,
-    gross,
-    net: Math.max(0, net),
-    incomeTax,
-    solidarityTax,
-    laborMarketContrib,
-    employeeSocial: empSoc.total,
-    employeeSocialBreakdown: empSoc.breakdown,
-    employerSocial: emplerSoc.total,
-    employerSocialBreakdown: emplerSoc.breakdown,
-    totalCompanyCost,
-    effectiveTaxRate: gross > 0 ? ((gross - Math.max(0, net)) / gross * 100) : 0,
+    gross: grossEUROut,
+    net: netEUR,
+    incomeTax: incomeTaxEUR,
+    solidarityTax: solidarityTaxEUR,
+    laborMarketContrib: laborContribEUR,
+    employeeSocial: empSocEUR,
+    employeeSocialBreakdown: empBreakdownEUR,
+    employerSocial: emplerSocEUR,
+    employerSocialBreakdown: emplerBreakdownEUR,
+    totalCompanyCost: totalCostEUR,
+    // Percentages based on gross (currency-independent)
+    effectiveTaxRate: gross > 0 ? ((gross - Math.max(0, netLocal)) / gross * 100) : 0,
     employerBurdenPct: gross > 0 ? (emplerSoc.total / gross * 100) : 0,
-    netPct: gross > 0 ? (Math.max(0, net) / gross * 100) : 0,
+    netPct: gross > 0 ? (Math.max(0, netLocal) / gross * 100) : 0,
     taxPct: gross > 0 ? (incomeTax / gross * 100) : 0,
     socialPct: gross > 0 ? (empSoc.total / gross * 100) : 0,
     months: co.months || 12,

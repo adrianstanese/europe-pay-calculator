@@ -8,3 +8,4 @@ dist
 .vscode
 *.timestamp-*.mjs
 DEPLOY.sh
+.vercel
