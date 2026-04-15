@@ -1543,7 +1543,7 @@ function StackedBar({ segments, height = 28, th, style = {} }) {
 }
 
 // ─── BREAKDOWN TABLE ────────────────────────────────────────────
-function BreakdownTable({ result, th }) {
+function BreakdownTable({ result, th, divisor = 1 }) {
   if (!result) return null;
   const rows = [];
 
@@ -1595,9 +1595,9 @@ function BreakdownTable({ result, th }) {
 
   const fmt = (v) => {
     if (v === null || v === undefined) return "";
-    const abs = Math.abs(v);
-    const sign = v < 0 ? "-" : v > 0 && !rows.find(r => r.amount === v && (r.type === "header" || r.type === "result" || r.type === "total")) ? "+" : "";
-    if (result.currency === "EUR") return `${sign}€${abs.toLocaleString("en", { minimumFractionDigits: 0, maximumFractionDigits: 0 })}`;
+    const scaled = v / divisor;
+    const abs = Math.abs(scaled);
+    const sign = scaled < 0 ? "-" : scaled > 0 && !rows.find(r => r.amount === v && (r.type === "header" || r.type === "result" || r.type === "total")) ? "+" : "";
     return `${sign}€${abs.toLocaleString("en", { minimumFractionDigits: 0, maximumFractionDigits: 0 })}`;
   };
 
@@ -1771,9 +1771,10 @@ function MapView({ results, onSelect, selected, salary, th }) {
 }
 
 // ─── COMPARISON VIEW ────────────────────────────────────────────
-function ComparisonView({ countries, salary, direction, th }) {
+function ComparisonView({ countries, salary, direction, th, divisor = 1 }) {
   const results = countries.map(cc => calculateCountry(cc, salary, direction)).filter(Boolean);
   if (results.length < 2) return null;
+  const cfmt = (v) => `€${(v / divisor).toLocaleString("en", { maximumFractionDigits: 0 })}`;
 
   return <div className="epc-fade" style={{ display: "grid", gridTemplateColumns: `repeat(${Math.min(results.length, 4)}, 1fr)`, gap: 12 }}>
     {results.map((r, i) => {
@@ -1796,11 +1797,11 @@ function ComparisonView({ countries, salary, direction, th }) {
 
         <div style={{ marginTop: 12 }}>
           {[
-            { label: "Net Salary", value: `€${r.net.toLocaleString("en", { maximumFractionDigits: 0 })}`, color: CHART_COLORS.net },
-            { label: "Income Tax", value: `€${r.incomeTax.toLocaleString("en", { maximumFractionDigits: 0 })}`, color: CHART_COLORS.tax },
-            { label: "Social Contrib.", value: `€${r.employeeSocial.toLocaleString("en", { maximumFractionDigits: 0 })}`, color: CHART_COLORS.empSocial },
-            { label: "Employer Cost", value: `€${r.employerSocial.toLocaleString("en", { maximumFractionDigits: 0 })}`, color: CHART_COLORS.employer },
-            { label: "Total Cost", value: `€${r.totalCompanyCost.toLocaleString("en", { maximumFractionDigits: 0 })}`, color: CHART_COLORS.employer, bold: true },
+            { label: "Net Salary", value: cfmt(r.net), color: CHART_COLORS.net },
+            { label: "Income Tax", value: cfmt(r.incomeTax), color: CHART_COLORS.tax },
+            { label: "Social Contrib.", value: cfmt(r.employeeSocial), color: CHART_COLORS.empSocial },
+            { label: "Employer Cost", value: cfmt(r.employerSocial), color: CHART_COLORS.employer },
+            { label: "Total Cost", value: cfmt(r.totalCompanyCost), color: CHART_COLORS.employer, bold: true },
           ].map((row, j) => (
             <div key={j} style={{ display: "flex", justifyContent: "space-between", padding: "4px 0", borderBottom: j < 4 ? `1px solid ${th.gbd}` : "none" }}>
               <div style={{ display: "flex", alignItems: "center", gap: 4 }}>
@@ -1911,8 +1912,12 @@ export default function App() {
     if (!isNaN(num) && num >= 0) setSalary(num);
   };
 
-  const fmt = (v) => `€${v.toLocaleString("en", { minimumFractionDigits: 0, maximumFractionDigits: 0 })}`;
+  const div = period === "monthly" ? 12 : 1;
+  const fmt = (v) => `€${(v / div).toLocaleString("en", { minimumFractionDigits: 0, maximumFractionDigits: 0 })}`;
+  const fmtAnnual = (v) => `€${v.toLocaleString("en", { minimumFractionDigits: 0, maximumFractionDigits: 0 })}`;
   const fmtMonth = (v) => `€${(v / 12).toLocaleString("en", { minimumFractionDigits: 0, maximumFractionDigits: 0 })}`;
+  const periodLabel = period === "monthly" ? "/month" : "/year";
+  const altLabel = period === "monthly" ? "/year" : "/month";
   const selectedCo = COUNTRIES.find(c => c.c === country);
 
   const directionLabels = {
@@ -2045,10 +2050,10 @@ export default function App() {
       {view === "dashboard" && result && <div className="epc-fade">
         {/* Stat Cards */}
         <div className="epc-grid-4" style={{ display: "grid", gridTemplateColumns: "repeat(auto-fit, minmax(200px, 1fr))", gap: 12, marginBottom: 20 }}>
-          <StatCard th={th} label="Net Salary" value={fmt(result.net)} sub={`${fmtMonth(result.net)}/month · ${result.netPct.toFixed(1)}% of gross`} color={CHART_COLORS.net} icon="wallet" />
-          <StatCard th={th} label="Income Tax" value={fmt(result.incomeTax)} sub={`${result.taxPct.toFixed(1)}% effective rate`} color={CHART_COLORS.tax} icon="arrowDown" />
-          <StatCard th={th} label="Employee Social" value={fmt(result.employeeSocial)} sub={`${result.socialPct.toFixed(1)}% of gross`} color={CHART_COLORS.empSocial} icon="users" />
-          <StatCard th={th} label="Total Company Cost" value={fmt(result.totalCompanyCost)} sub={`${fmtMonth(result.totalCompanyCost)}/month · +${result.employerBurdenPct.toFixed(1)}% above gross`} color={CHART_COLORS.employer} icon="building" />
+          <StatCard th={th} label={`Net Salary${periodLabel}`} value={fmt(result.net)} sub={`${period === "monthly" ? fmtAnnual(result.net) + "/year" : fmtMonth(result.net) + "/month"} · ${result.netPct.toFixed(1)}% of gross`} color={CHART_COLORS.net} icon="wallet" />
+          <StatCard th={th} label={`Income Tax${periodLabel}`} value={fmt(result.incomeTax)} sub={`${result.taxPct.toFixed(1)}% effective rate`} color={CHART_COLORS.tax} icon="arrowDown" />
+          <StatCard th={th} label={`Employee Social${periodLabel}`} value={fmt(result.employeeSocial)} sub={`${result.socialPct.toFixed(1)}% of gross`} color={CHART_COLORS.empSocial} icon="users" />
+          <StatCard th={th} label={`Total Company Cost${periodLabel}`} value={fmt(result.totalCompanyCost)} sub={`${period === "monthly" ? fmtAnnual(result.totalCompanyCost) + "/year" : fmtMonth(result.totalCompanyCost) + "/month"} · +${result.employerBurdenPct.toFixed(1)}% above gross`} color={CHART_COLORS.employer} icon="building" />
         </div>
 
         <div className="epc-grid-2" style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: 20 }}>
@@ -2137,7 +2142,7 @@ export default function App() {
                 {result.months > 12 ? `${result.months} salary months` : "12 months"}
               </div>
             </div>
-            <BreakdownTable result={result} th={th} />
+            <BreakdownTable result={result} th={th} divisor={div} />
           </Card>
         </div>
       </div>}
@@ -2147,7 +2152,7 @@ export default function App() {
         <div style={{ textAlign: "center", marginBottom: 16 }}>
           <h2 style={{ margin: "0 0 4px", fontSize: 20, fontWeight: 800, color: th.tx }}>European Tax Map</h2>
           <p style={{ margin: 0, fontSize: 13, color: th.t2 }}>
-            Net salary as % of gross for €{annualSalary.toLocaleString()} · Click any country for details
+            Net salary as % of gross for {fmt(annualSalary * div)}{periodLabel} · Click any country for details
           </p>
         </div>
 
@@ -2195,7 +2200,7 @@ export default function App() {
         {/* Ranking Table */}
         <Card th={th} style={{ padding: 20, marginTop: 20 }}>
           <div style={{ fontSize: 12, fontWeight: 700, color: th.t3, textTransform: "uppercase", letterSpacing: 0.8, marginBottom: 12 }}>
-            Country Ranking — Highest Net Salary (€{annualSalary.toLocaleString()} gross)
+            Country Ranking — Highest Net Salary ({fmt(annualSalary * div)} gross{periodLabel})
           </div>
           <div style={{ maxHeight: 400, overflowY: "auto" }}>
             {Object.values(allResults)
@@ -2218,7 +2223,7 @@ export default function App() {
                     {r.netPct.toFixed(1)}%
                   </span>
                   <span style={{ fontSize: 12, fontWeight: 600, fontFamily: FM, color: th.t2, width: 80, textAlign: "right" }}>
-                    €{r.net.toLocaleString("en", { maximumFractionDigits: 0 })}
+                    €{(r.net / div).toLocaleString("en", { maximumFractionDigits: 0 })}
                   </span>
                 </div>;
               })}
@@ -2269,7 +2274,7 @@ export default function App() {
           </div>
         </div>
 
-        <ComparisonView countries={compareCountries} salary={annualSalary} direction={direction} th={th} />
+        <ComparisonView countries={compareCountries} salary={annualSalary} direction={direction} th={th} divisor={div} />
 
         {/* Comparison bars */}
         {compareCountries.length >= 2 && <Card th={th} style={{ padding: 20, marginTop: 20 }}>
@@ -2285,7 +2290,7 @@ export default function App() {
                 <span style={{ fontSize: 18 }}>{co?.f}</span>
                 <span style={{ fontSize: 13, fontWeight: 600, color: th.tx, flex: 1 }}>{co?.n}</span>
                 <span style={{ fontSize: 12, fontWeight: 700, fontFamily: FM, color: CHART_COLORS.net }}>
-                  Net: €{r.net.toLocaleString("en", { maximumFractionDigits: 0 })}
+                  Net: €{(r.net / div).toLocaleString("en", { maximumFractionDigits: 0 })}
                 </span>
               </div>
               <StackedBar th={th} height={24} segments={[
