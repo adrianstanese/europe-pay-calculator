@@ -1,0 +1,70 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover" />
+  <meta name="description" content="Calculate net salary, gross salary, and total company cost for 45+ European countries. Compare taxes, social contributions, and employer costs side by side." />
+  <meta name="keywords" content="salary calculator, net salary, gross salary, tax calculator, Europe, EU, social contributions, employer cost, take-home pay, income tax" />
+  <meta name="author" content="Adrian Constantin" />
+  <meta name="robots" content="index, follow" />
+  <meta name="theme-color" content="#2563EB" />
+
+  <!-- Open Graph -->
+  <meta property="og:title" content="EuropePayCalculator — Net, Gross & Total Cost for 45+ Countries" />
+  <meta property="og:description" content="Calculate net salary, gross salary, and total company cost for 45+ European countries. Interactive map, charts, and side-by-side comparison." />
+  <meta property="og:type" content="website" />
+  <meta property="og:locale" content="en_US" />
+
+  <!-- Twitter Card -->
+  <meta name="twitter:card" content="summary_large_image" />
+  <meta name="twitter:title" content="EuropePayCalculator" />
+  <meta name="twitter:description" content="Net, Gross & Total Cost Calculator for 45+ European countries" />
+
+  <title>EuropePayCalculator — Net, Gross & Total Cost Calculator for 45+ Countries</title>
+
+  <link rel="icon" type="image/svg+xml" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><text y='.9em' font-size='90'>🌍</text></svg>" />
+  <link rel="canonical" href="https://europepay.calculator.app" />
+
+  <style>
+    body { margin: 0; padding: 0; -webkit-font-smoothing: antialiased; -moz-osx-font-smoothing: grayscale; }
+    #root { min-height: 100vh; }
+    /* Prevent FOUC */
+    #root:empty {
+      display: flex; align-items: center; justify-content: center; min-height: 100vh;
+      background: #F2F1EE;
+    }
+    #root:empty::after {
+      content: '🌍'; font-size: 48px; animation: pulse 1.5s ease-in-out infinite;
+    }
+    @keyframes pulse { 0%, 100% { opacity: 1; transform: scale(1); } 50% { opacity: 0.5; transform: scale(0.95); } }
+    @media (prefers-color-scheme: dark) {
+      #root:empty { background: #0F0F12; }
+    }
+  </style>
+</head>
+<body>
+  <div id="root"></div>
+  <script type="module" src="/src/main.jsx"></script>
+
+  <!-- Structured Data for SEO -->
+  <script type="application/ld+json">
+  {
+    "@context": "https://schema.org",
+    "@type": "WebApplication",
+    "name": "EuropePayCalculator",
+    "description": "Calculate net salary, gross salary, and total company cost for 45+ European countries",
+    "applicationCategory": "FinanceApplication",
+    "operatingSystem": "Any",
+    "offers": {
+      "@type": "Offer",
+      "price": "0",
+      "priceCurrency": "EUR"
+    },
+    "author": {
+      "@type": "Person",
+      "name": "Adrian Constantin"
+    }
+  }
+  </script>
+</body>
+</html>
